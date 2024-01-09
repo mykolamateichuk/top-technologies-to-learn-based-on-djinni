@@ -10,6 +10,14 @@ ENGLISH_LEVELS_DJINNI = [
     "Advanced/Fluent"
 ]
 
+EXPERIENCE_YEARS_DJINNI = {
+    "Без досвіду": "No experience",
+    "1 рік досвіду": "1 year",
+    "2 роки досвіду": "2 years",
+    "3 роки досвіду": "3 years",
+    "5 років досвіду": "5 years"
+}
+
 
 class DjinniSpider(scrapy.Spider):
     name = "djinni"
@@ -23,8 +31,16 @@ class DjinniSpider(scrapy.Spider):
                              .get()
                              .strip())
 
+            experience_years = (vacancy
+                                .css(".job-list-item__job-info .nobr::text")[-2]
+                                .get()
+                                .strip())
+
             if english_level not in ENGLISH_LEVELS_DJINNI:
-                english_level = "No English"
+                english_level = "Not stated"
+
+            experience_years = (EXPERIENCE_YEARS_DJINNI
+                                .get(experience_years, "Not stated"))
 
             yield {
                 "vacancy_name": (vacancy.css(".job-list-item__link::text")
@@ -36,10 +52,7 @@ class DjinniSpider(scrapy.Spider):
                                   .replace("\t", "")
                                   .replace("\n", "")),
                 "english_level": english_level,
-                "experience_years": (vacancy
-                                     .css(".job-list-item__job-info .nobr::text")[-2]
-                                     .get()
-                                     .strip())
+                "experience_years": experience_years,
             }
 
         next_page = (response
